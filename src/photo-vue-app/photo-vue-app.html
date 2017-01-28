@@ -1,0 +1,108 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+
+<dom-module id="photo-vue-app">
+	<template>
+		<style>
+			:host {
+				display: block;
+			}
+		</style>
+		<form is="iron-form" id="uri_form">
+			<label for="dir_uri_input">Path to directory</label>
+			<input is="iron-input" id="dir_uri_input" />
+			<button type="submit">Load</button>
+		</form>
+		<template is="dom-if" if="{{_images_loaded}}">
+			<iron-image src="{{_current_image_uri}}" on-tap="_increment_index"></iron-image>
+			<p on-tap="_decrement_index">Left</p>
+			<p on-tap="_increment_index">Right</p>
+		</template>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'photo-vue-app',
+			properties: {
+				_images_array: {
+					type: Array,
+				},
+				_current_index: {
+					type: Number,
+					observer: '_on_index_change',
+				},
+				_images_loaded: {
+					type: Boolean,
+					value: false,
+					notify: true,
+				},
+				_current_image_uri: {
+					type: String,
+					notify: true,
+				},
+				electron_comm: {
+					type: Object,
+					value: function() {
+						var { ipcRenderer } = require('electron');
+						return ipcRenderer;
+					}
+				}
+			},
+			ready: function() {
+				// Grab the uri form element from the page.
+				var uri_form = this.$.uri_form;
+
+				// Add an event listener from 'iron-form-presubmit'. We are
+				// using our own submit function here.
+				uri_form.addEventListener('iron-form-presubmit', this.submit.bind(this));
+
+				this.electron_comm.on('images_array_sent_to_renderer', (event, arg) => {
+					var images_array = arg.arr;
+					if(true) {
+						images_array = this.shuffle(images_array);
+					}
+					this.set('_images_array', arg.arr);
+					this.set('_images_loaded', true);
+					this.set('_current_index', 0);
+				});
+			},
+			_decrement_index: function() {
+				var new_index = this._current_index - 1;
+				if(new_index < 0) {
+					new_index = this._images_array.length - 1;
+				}
+				this.set('_current_index', new_index);
+			},
+			_increment_index: function() {
+				var new_index = this._current_index + 1;
+				if(new_index >= this._images_array.length) {
+					new_index = 0;
+				}
+				this.set('_current_index', new_index);
+			},
+			_on_index_change: function() {
+				this.set('_current_image_uri', this._images_array[this._current_index])
+			},
+			shuffle: function(arr) {
+				// JS implementation of Fisher-Yates shuffle
+				// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+				var m = arr.length;
+				var i, t;
+				while(m) {
+					i = Math.floor(Math.random() * m);
+					m--;
+					t = arr[m];
+					arr[m] = arr[i];
+					arr[i] = t;
+				}
+				return arr;
+			},
+			submit: function(event) {
+				event.preventDefault();
+				this.electron_comm.send('path_uri_updated', this.$.dir_uri_input.value);
+			}
+		});
+	</script>
+</dom-module>

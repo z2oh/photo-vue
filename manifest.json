@@ -1,0 +1,7 @@
+{
+  "name": "photo-vue",
+  "short_name": "photo-vue",
+  "description": "Simple photo viewer",
+  "start_url": "/",
+  "display": "standalone"
+}
