@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-input/iron-input.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../video-player/video-player.html">
 
 <dom-module id="photo-vue-app">
 	<template>
@@ -15,8 +16,14 @@
 			<input is="iron-input" id="dir_uri_input" />
 			<button type="submit">Load</button>
 		</form>
+		<p>[[_current_image_uri]]</p>
 		<template is="dom-if" if="{{_images_loaded}}">
-			<iron-image src="{{_current_image_uri}}" on-tap="_increment_index"></iron-image>
+			<template is="dom-if" if="[[_is_video(_current_image_uri)]]">
+				<video-player src="{{_current_image_uri}}" autoplay="false" on-tap="_increment_index"></video-player>
+			</template>
+			<template is="dom-if" if="[[_is_image(_current_image_uri)]]">
+				<iron-image src="{{_current_image_uri}}" on-tap="_increment_index"></iron-image>
+			</template>
 			<p on-tap="_decrement_index">Left</p>
 			<p on-tap="_increment_index">Right</p>
 		</template>
@@ -82,8 +89,15 @@
 				}
 				this.set('_current_index', new_index);
 			},
+			_is_video: function() {
+				var s = this._current_image_uri;
+				return 'webm' === s.substr(s.length - 4) || 'mp4' === s.substr(s.length - 3);
+			},
+			_is_image: function() {
+				return !this._is_video();
+			},
 			_on_index_change: function() {
-				this.set('_current_image_uri', this._images_array[this._current_index])
+				this.set('_current_image_uri', this._images_array[this._current_index]);
 			},
 			shuffle: function(arr) {
 				// JS implementation of Fisher-Yates shuffle

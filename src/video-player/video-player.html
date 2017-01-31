@@ -1,0 +1,36 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="video-player">
+	<template>
+		<style>
+			:host {
+				display: block;
+			}
+		</style>
+		<video id="video">
+			<source id="source">
+		</video>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'video-player',
+			properties: {
+				autoplay: {
+					type: Boolean,
+					value: false,
+				},
+				src: {
+					type: String,
+					observer: '_on_src_changed',
+				}
+			},
+			_on_src_changed: function() {
+				this.$.source.setAttribute('src', this.src);
+				this.$.video.pause();
+				this.$.video.load();
+				this.$.video.play();
+			},
+		});
+	</script>
+</dom-module>
