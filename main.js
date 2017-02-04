@@ -1,5 +1,7 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
+const mime = require('mime');
+const s = require('string');
 const path = require('path');
 const slash = require('slash');
 const url = require('url');
@@ -48,8 +50,16 @@ app.on('activate', () => {
 });
 
 function is_file_image(path) {
-	// TODO
-	return true;
+	var type_string = s(mime.lookup(path));
+	if(type_string.startsWith('image')) {
+		type_string = type_string.chompLeft('image/').s;
+		return type_string === 'png' || type_string == 'jpg' || type_string === 'gif';
+	}
+	else if(type_string.startsWith('video')) {
+		type_string = type_string.chompLeft('video/').s;
+		return type_string === 'mp4' || type_string === 'webm';
+	}
+	return false;
 }
 
 // This function will return an array of files and arrays in a tree structure to
