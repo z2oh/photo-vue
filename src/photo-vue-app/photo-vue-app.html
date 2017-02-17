@@ -55,6 +55,16 @@
 						var { ipcRenderer } = require('electron');
 						return ipcRenderer;
 					}
+				},
+				left_key_code: {
+					type: Number,
+					// The key code for left arrow, to be set in settings later
+					value: 37,
+				},
+				right_key_code: {
+					type: Number,
+					// The key code for right arrow, to be set in settings later
+					value: 39,
 				}
 			},
 			ready: function() {
@@ -74,8 +84,12 @@
 					this.set('_images_loaded', true);
 					this.set('_current_index', 0);
 				});
+				document.onkeydown = this._handle_key_down.bind(this);
 			},
 			_decrement_index: function() {
+				if(!this._images_array) {
+					return;
+				}
 				var new_index = this._current_index - 1;
 				if(new_index < 0) {
 					new_index = this._images_array.length - 1;
@@ -83,6 +97,9 @@
 				this.set('_current_index', new_index);
 			},
 			_increment_index: function() {
+				if(!this._images_array) {
+					return;
+				}
 				var new_index = this._current_index + 1;
 				if(new_index >= this._images_array.length) {
 					new_index = 0;
@@ -95,6 +112,15 @@
 			},
 			_is_image: function() {
 				return !this._is_video();
+			},
+			_handle_key_down: function(event) {
+				var key_code = event.keyCode;
+				if(key_code === this.left_key_code) {
+					this._decrement_index();
+				}
+				else if(key_code === this.right_key_code) {
+					this._increment_index();
+				}
 			},
 			_on_index_change: function() {
 				this.set('_current_image_uri', this._images_array[this._current_index]);
