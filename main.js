@@ -53,7 +53,7 @@ function is_file_image(path) {
 	var type_string = s(mime.lookup(path));
 	if(type_string.startsWith('image')) {
 		type_string = type_string.chompLeft('image/').s;
-		return type_string === 'png' || type_string == 'jpg' || type_string === 'gif';
+		return type_string === 'png' || type_string === 'jpeg' || type_string === 'gif';
 	}
 	else if(type_string.startsWith('video')) {
 		type_string = type_string.chompLeft('video/').s;
